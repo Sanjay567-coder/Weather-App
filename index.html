@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Application</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 { color: #333; margin-bottom: 1.5rem; }
+        input {
+            padding: 10px;
+            width: 70%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+        button {
+            padding: 10px 15px;
+            background: #6c63ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background: #5149d1; }
+        #weather-info { margin-top: 20px; line-height: 1.6; }
+        .error { color: #ff4d4d; font-weight: bold; }
+        .temp { font-size: 2rem; font-weight: bold; color: #222; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Weather App</h1>
+    <form id="location-form">
+        <input type="text" id="location" placeholder="e.g. Chennai, IN" required>
+        <button type="submit">Search</button>
+    </form>
+
+    <div id="weather-info">
+        </div>
+</div>
+
+<script>
+    const weatherInfoDiv = document.getElementById('weather-info');
+    const locationInput = document.getElementById('location');
+
+    document.getElementById('location-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const location = locationInput.value;
+        
+        // Show a loading state
+        weatherInfoDiv.innerHTML = `<p>Fetching weather for ${location}...</p>`;
+
+        try {
+            const response = await fetch(`/weather?location=${encodeURIComponent(location)}`);
+            const weatherData = await response.json();
+
+            if (response.ok && !weatherData.error) {
+                // Display weather information with better formatting
+                weatherInfoDiv.innerHTML = `
+                    <h3>${weatherData.city}</h3>
+                    <div class="temp">${weatherData.temperature}</div>
+                    <p>Condition: <strong>${weatherData.description}</strong></p>
+                `;
+            } else {
+                // Handle 404 or other errors sent by your Node server
+                weatherInfoDiv.innerHTML = `<p class="error">Error: ${weatherData.error || 'City not found'}</p>`;
+            }
+        } catch (err) {
+            weatherInfoDiv.innerHTML = `<p class="error">Server is offline. Start your Node script!</p>`;
+        }
+    });
+</script>
+</body>
+</html>
